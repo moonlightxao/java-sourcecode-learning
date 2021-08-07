@@ -6,16 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>MoonLight的博客</title>
+  <title>ReentrantLock总结以及原理分析 | MoonLight的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京理工大学18级软件工程，喜欢Java后端技术">
-<meta property="og:type" content="website">
-<meta property="og:title" content="MoonLight的博客">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="主要总结了ReentrantLock的可重入，公平与非公平实现的原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ReentrantLock总结以及原理分析">
+<meta property="og:url" content="http://example.com/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="MoonLight的博客">
-<meta property="og:description" content="南京理工大学18级软件工程，喜欢Java后端技术">
+<meta property="og:description" content="主要总结了ReentrantLock的可重入，公平与非公平实现的原理">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-08-07T12:22:21.000Z">
+<meta property="article:modified_time" content="2021-08-07T12:22:58.380Z">
 <meta property="article:author" content="MoonLight">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JUC">
+<meta property="article:tag" content="ReentrantLock">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="MoonLight的博客" type="application/atom+xml">
@@ -152,16 +157,14 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-ReentrantLock总结以及原理分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-ReentrantLock总结以及原理分析" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">ReentrantLock总结以及原理分析</a>
+    <h1 class="article-title" itemprop="name">
+      ReentrantLock总结以及原理分析
     </h1>
   
 
@@ -196,6 +199,27 @@
 
       
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -234,16 +258,75 @@
 
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">JUC中锁与AQS相关知识总结</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -263,356 +346,14 @@
 
 
 
-
   
-    <article id="post-JUC中锁与AQS相关知识总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">JUC中锁与AQS相关知识总结</a>
-    </h1>
   
 
-        
-        <a href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="JUC中锁与AQS相关知识总结"><a href="#JUC中锁与AQS相关知识总结" class="headerlink" title="JUC中锁与AQS相关知识总结"></a>JUC中锁与AQS相关知识总结</h1><h2 id="1-Lock接口"><a href="#1-Lock接口" class="headerlink" title="1. Lock接口"></a>1. Lock接口</h2><p>​              在Java5之前，要想使用锁来保护共享资源大多数情况是使用synchronized关键字。在Java5之后，并发包里增加了Lock接口及其实现类来提供锁的功能。</p>
-<p>​              Lock接口与synchronized有许多区别。synchronized修饰在方法体或者代码块上可以隐式地获取和释放锁，并且锁地获取和释放操作被固化。但是Lock接口可以显示地获取和释放锁，提高了锁的可操作性。并且Lock接口支持可中断锁以及超时锁等synchronized没有的特性。</p>
-<p>​              Lock接口的使用范式如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Lock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line">lock.lock();</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line"><span class="comment">//访问临界区</span></span><br><span class="line">&#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">lock.unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              Lock接口的实现类能实现锁的功能，靠的是聚合AQS的子类作为同步器，将提供给用户的锁的操作委托给这个同步器执行。</p>
-<h2 id="2-队列同步器-AQS"><a href="#2-队列同步器-AQS" class="headerlink" title="2. 队列同步器(AQS)"></a>2. 队列同步器(AQS)</h2><p>​              AQS是并发包里同步组件的核心基础，可以用来构建锁和其他同步器件。</p>
-<p>​              AQS维护一个int型的同步状态属性，利用这个同步状态属性可以实现独占锁和共享锁，以及如信号量等同步组件。比如要实现独占锁，则同步状态往往初始化为1。另外AQS内部还定义了一个静态内部类Node。Node组成了AQS的同步队列和等待队列，Node里保存了线程信息，等待状态等。AQS维护同步队列的头结点head和尾结点tail，并负责同步队列的操作。</p>
-<p>​              AQS采用模板方法的设计模式，提供了独占和共享式获取释放同步状态的方法，以及可中断和超时获取同步状态的方法。这些模板方法调用了一些抽象方法。AQS里的抽象方法由继承它的子类根据需要实现。自定义同步组件往往会声明一个继承AQS的静态内部类，称为同步器。并将Lock接口提供给用户调用的方法委托给同步器处理。这样做的好处有两个方面，第一个是对同步组件的使用者隐藏了实现细节，用户只需要调用Lock接口提供的方法就可以获得锁的功能，而不知道具体的执行是由同步器来完成。第二个是向同步组件的开发者提供了便捷的开发接口，隐藏了底层操作系统的线程管理等细节。</p>
-<h3 id="2-1-AQS的同步状态操作"><a href="#2-1-AQS的同步状态操作" class="headerlink" title="2.1 AQS的同步状态操作"></a>2.1 AQS的同步状态操作</h3><p>​              利用AQS设计同步组件的关键在于同步状态。AQS提供了三个方法保证线程安全的修改同步状态</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">int</span> state;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">setState</span><span class="params">(<span class="keyword">int</span> newState)</span> </span>&#123;</span><br><span class="line">        state = newState;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="title">getState</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">compareAndSetState</span><span class="params">(<span class="keyword">int</span> expect, <span class="keyword">int</span> update)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// See below for intrinsics setup to support this</span></span><br><span class="line">        <span class="keyword">return</span> unsafe.compareAndSwapInt(<span class="keyword">this</span>, stateOffset, expect, update);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              可以看到同步状态的线程安全是基于volatile的可见性和禁止重排序，以及利用CAS原子性替换。</p>
-<h3 id="2-2-AQS的实现分析"><a href="#2-2-AQS的实现分析" class="headerlink" title="2.2 AQS的实现分析"></a>2.2 AQS的实现分析</h3><h4 id="2-2-1-同步队列"><a href="#2-2-1-同步队列" class="headerlink" title="2.2.1 同步队列"></a>2.2.1 同步队列</h4><p>​              AQS里的同步队列(FIFO队列，双向链表)用来完成同步状态的管理。当线程获取同步状态失败时，其线程引用，等待状态，会被封装成Node，并被加入到同步队列，同时AQS会阻塞该线程，直到被同步队列首节点的线程唤醒，并尝试获取同步状态。</p>
-<p>​              AQS维护同步队列的头结点head和尾结点tail，当线程获取同步状态失败时会被加入到同步队列的尾部。</p>
-<p>​              当线程获取同步状态失败时会被构造成Node并插入同步队列尾部，由于同一时刻可能与多个线程要被同时插入到尾部，为了避免出现类似HashMap在多线程环境下链表拉链可能拉成环的情况，AQS使用CAS的方式确保插入尾结点线程安全。</p>
-<p>​              AQS通过addWaiter方法构造Node结点，并将其插入到同步队列尾部，代码如下。首先尝试进行一次快速的插入，利用CAS检查实际尾结点和线程认为的尾结点是否一致，相同则修改结点指针完成插入。如果快速插入失败，则进入enq方法自旋加CAS不断尝试插入的同步队列尾部直到成功。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Node <span class="title">addWaiter</span><span class="params">(Node mode)</span> </span>&#123;</span><br><span class="line">        Node node = <span class="keyword">new</span> Node(Thread.currentThread(), mode);</span><br><span class="line">        <span class="comment">// Try the fast path of enq; backup to full enq on failure</span></span><br><span class="line">        Node pred = tail;</span><br><span class="line">        <span class="keyword">if</span> (pred != <span class="keyword">null</span>) &#123;</span><br><span class="line">            node.prev = pred;</span><br><span class="line">            <span class="keyword">if</span> (compareAndSetTail(pred, node)) &#123;</span><br><span class="line">                pred.next = node;</span><br><span class="line">                <span class="keyword">return</span> node;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        enq(node);</span><br><span class="line">        <span class="keyword">return</span> node;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              AQS的头结点通过unpartSuccessor方法释放同步状态，并利用LockSupport的方法唤醒其后继结点，这一过程没有使用CAS。头结点将其引用修改尾其后继结点，并断开与后继结点的连接，完成释放。</p>
-<h4 id="2-2-2-独占式同步状态获取与释放"><a href="#2-2-2-独占式同步状态获取与释放" class="headerlink" title="2.2.2 独占式同步状态获取与释放"></a>2.2.2 独占式同步状态获取与释放</h4><p>​              调用AQS的acquire(int)方法可以独占式的获取同步状态，该方法的逻辑简单来说是这样的：首先调用tryAcquire(int)方法，线程安全地获取同步状态，如果获取同步状态失败，则构造Node结点，并将其加入等待队列中。在等待队列里的线程不断地自旋，检查其前驱是否是首结点并且能否获取同步状态，如果前驱不是首结点或者获取同步状态失败，则修改结点的等待状态，并且阻塞结点保存的线程，直到首结点释放同步状态，并唤醒后继结点，让等待的线程成功获取到同步状态，这个自旋地过程是不响应中断的。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquire</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (!tryAcquire(arg) &amp;&amp;</span><br><span class="line">            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</span><br><span class="line">            selfInterrupt();</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">acquireQueued</span><span class="params">(<span class="keyword">final</span> Node node, <span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">                <span class="comment">//如果前驱不是首结点或者前驱是首结点但是获取同步状态失败</span></span><br><span class="line">                <span class="comment">//则被阻塞</span></span><br><span class="line">                <span class="keyword">if</span> (p == head &amp;&amp; tryAcquire(arg)) &#123;</span><br><span class="line">                    setHead(node);</span><br><span class="line">                    p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                    failed = <span class="keyword">false</span>;</span><br><span class="line">                    <span class="keyword">return</span> interrupted;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                    parkAndCheckInterrupt())</span><br><span class="line">                    interrupted = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (failed)</span><br><span class="line">                cancelAcquire(node);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              调用AQS的release(int)方法可以释放独占式同步状态。该方法的逻辑简单如下：首先调用treRelease释放同步状态，如果释放成功，则唤醒其后继结点，并且将头结点引用修改成其后继。由于获取到同步状态只能由一个线程，故这一操作不需要CAS来保证线程安全。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">boolean</span> <span class="title">release</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (tryRelease(arg)) &#123;</span><br><span class="line">            Node h = head;</span><br><span class="line">            <span class="keyword">if</span> (h != <span class="keyword">null</span> &amp;&amp; h.waitStatus != <span class="number">0</span>)</span><br><span class="line">                unparkSuccessor(h);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-2-3-共享式同步状态获取与释放"><a href="#2-2-3-共享式同步状态获取与释放" class="headerlink" title="2.2.3 共享式同步状态获取与释放"></a>2.2.3 共享式同步状态获取与释放</h4><p>​              共享式访问同步状态与独占式访问最大的区别在于，共享式访问不会阻塞其他共享式访问同步状态，但是独占式只能有一个线程进入访问，其他线程无论是共享还是独占都会被阻塞。</p>
-<p>​              调用AQS的acquireShared(int)方法来共享式获取同步状态，首先调用tryAcquireShared(int)方法尝试获取共享同步状态，当该方法返回值大于等于0表示获取成功，小于0获取失败，则调用doAcquireShared(int)方法。doAcquireShared方法简单来说，就是构造Node结点，加入到同步队列尾部，然后进入自旋过程。在自选过程里，当前驱是首结点时，再次尝试获取同步状态，获取成功则退出自旋，否则被阻塞。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">acquireShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (tryAcquireShared(arg) &lt; <span class="number">0</span>)</span><br><span class="line">            doAcquireShared(arg);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doAcquireShared</span><span class="params">(<span class="keyword">int</span> arg)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//构造Node结点，构造状态为共享</span></span><br><span class="line">        <span class="keyword">final</span> Node node = addWaiter(Node.SHARED);</span><br><span class="line">        <span class="keyword">boolean</span> failed = <span class="keyword">true</span>;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">boolean</span> interrupted = <span class="keyword">false</span>;</span><br><span class="line">            <span class="comment">//自旋尝试获取共享式同步状态</span></span><br><span class="line">            <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">                <span class="keyword">final</span> Node p = node.predecessor();</span><br><span class="line">                <span class="comment">//只有当前驱是首结点时才会尝试获取同步状态</span></span><br><span class="line">                <span class="keyword">if</span> (p == head) &#123;</span><br><span class="line">                    <span class="keyword">int</span> r = tryAcquireShared(arg);</span><br><span class="line">                    <span class="keyword">if</span> (r &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                        setHeadAndPropagate(node, r);</span><br><span class="line">                        p.next = <span class="keyword">null</span>; <span class="comment">// help GC</span></span><br><span class="line">                        <span class="keyword">if</span> (interrupted)</span><br><span class="line">                            selfInterrupt();</span><br><span class="line">                        failed = <span class="keyword">false</span>;</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">//前驱不是首结点或者获取同步状态失败，被阻塞，直到首结点释放同步状态将其唤醒</span></span><br><span class="line">                <span class="keyword">if</span> (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</span><br><span class="line">                    parkAndCheckInterrupt())</span><br><span class="line">                    interrupted = <span class="keyword">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (failed)</span><br><span class="line">                cancelAcquire(node);</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              调用AQS的releaseShared(int)方法释放共享式同步状态，该方法首先调用tryReleaseShared(int)，尝试释放同步状态，如果释放成功，则调用doReleaseShared()方法，唤醒后续处于等待的结点，这过程是采用CAS来保证线程安全，因为共享式同步状态往往有多个线程同时持有同步状态。</p>
-<h4 id="2-2-4-等待队列"><a href="#2-2-4-等待队列" class="headerlink" title="2.2.4 等待队列"></a>2.2.4 等待队列</h4><p>​              在总结AQS等待队列实现之前，首先要总结一下Condition接口相关的知识。</p>
-<p>​              任意一个Java对象都有wait，notify，notifyAll方法，利用这些方法可以在线程不满足某些执行条件时进入等待状态，直到其他线程将其唤醒。Java对象自带的这些监视器方法配合synchronized锁可以实现等待通知范式，但是相比之下，利用Condition接口提供的方法也能做到一样的功能，并且更加灵活。且Condition接口与对象监视器方法的不同点有：Condition支持中断屏蔽等待，特定时间等待，以及最重要的，对象监视器只有一个等待队列，但是利用Condition可以支持多个条件，多个等待队列。</p>
-<p>​              Condition的使用也非常简单，下面是一个简单的示例：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">Lock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line">Condition c1 = lock.newCondition();</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sample</span><span class="params">()</span> throw InterruptedException</span>&#123;</span><br><span class="line">    <span class="comment">//获取锁</span></span><br><span class="line">    lock.lock();</span><br><span class="line">    <span class="keyword">try</span>&#123;</span><br><span class="line">        <span class="comment">//只有获取锁成功才能调用条件对象的相关方法，调用之后，线程释放锁，并被构造成Node结点</span></span><br><span class="line">        <span class="comment">//进入Condition的等待队列</span></span><br><span class="line">        condition.await();</span><br><span class="line">    &#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              获取到锁的线程调用await方法会释放锁，然后进入等待队列，直到其他线程调用signal方法将其唤醒。Condition对象的创建依赖于Lock对象。</p>
-<p>​              ConditionObject是AQS的内部类，实现了Condition接口。ConditionObject对象维护等待队列的头结点和尾结点。等待队列的结点类型与同步队列结点一样，都是Node。AQS里可以被多个ConditionObject依赖，故相比于synchronized的对象监视器只能有一个等待队列，基于AQS的同步组件可以有多个等待队列。</p>
-<p>​              当获取到锁的线程调用await方法时将会释放锁并进入等待状态，具体过程简单来说如下：首先检查线程中断状态，如果被中断抛出中断异常。之后调用addConditionWaiter()方法将线程引用以及等待状态构造成Node结点，并释放锁，这部分过程没有CAS来确保线程安全，因为这时候线程还持有锁。最后进入自旋过程，不断检查引用了自己的结点是否被加入到同步队列中参与同步状态的获取，如果没有被加入同步队列，则被阻塞。最后当发现自己被加入到同步队列时，退出自旋过程，调用aquiredQueued方法自旋获取同步状态。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">await</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (Thread.interrupted())</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> InterruptedException();</span><br><span class="line">            <span class="comment">//将线程引用以及等待状态构造成新的Node结点，添加到等待队列尾部，这个过程由锁确保线程安全</span></span><br><span class="line">            Node node = addConditionWaiter();</span><br><span class="line">            <span class="comment">//释放锁，并唤醒同步队列的后继结点</span></span><br><span class="line">            <span class="keyword">int</span> savedState = fullyRelease(node);</span><br><span class="line">            <span class="keyword">int</span> interruptMode = <span class="number">0</span>;</span><br><span class="line">            <span class="comment">//自旋检查自己是否被加入到同步队列，没有则被阻塞</span></span><br><span class="line">            <span class="keyword">while</span> (!isOnSyncQueue(node)) &#123;</span><br><span class="line">                LockSupport.park(<span class="keyword">this</span>);</span><br><span class="line">                <span class="keyword">if</span> ((interruptMode = checkInterruptWhileWaiting(node)) != <span class="number">0</span>)</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//当发现自己被加入到同步队列，退出自旋，并参与到锁的获取</span></span><br><span class="line">            <span class="keyword">if</span> (acquireQueued(node, savedState) &amp;&amp; interruptMode != THROW_IE)</span><br><span class="line">                interruptMode = REINTERRUPT;</span><br><span class="line">            <span class="keyword">if</span> (node.nextWaiter != <span class="keyword">null</span>) <span class="comment">// clean up if cancelled</span></span><br><span class="line">                unlinkCancelledWaiters();</span><br><span class="line">            <span class="keyword">if</span> (interruptMode != <span class="number">0</span>)</span><br><span class="line">                reportInterruptAfterWait(interruptMode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>​              当调用ConditionObject对象的signal方法时，过程简单描述如下：首先检查并确保调用siganl方法的线程是获取锁的线程。之后调用doSignal方法，循环尝试修改等待队列头结点指向其后继，并断开原本首结点与其后继的指针，再进入自旋加CAS过程，尝试将其从等待队列转移到同步队列尾部，这个过程没有构造新的Node。当被加入到同步队列成功时，当前线程唤醒刚被插入到同步队列尾部的结点的线程，被唤醒的线程退出wait方法里的检查是否在同步队列循环，参与到自旋获取锁的过程。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">signal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!isHeldExclusively())</span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> IllegalMonitorStateException();</span><br><span class="line">    Node first = firstWaiter;</span><br><span class="line">    <span class="keyword">if</span> (first != <span class="keyword">null</span>)</span><br><span class="line">       doSignal(first);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">doSignal</span><span class="params">(Node first)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">do</span> &#123;</span><br><span class="line">       <span class="keyword">if</span> ( (firstWaiter = first.nextWaiter) == <span class="keyword">null</span>)</span><br><span class="line">            lastWaiter = <span class="keyword">null</span>;</span><br><span class="line">       first.nextWaiter = <span class="keyword">null</span>;</span><br><span class="line">   &#125; <span class="keyword">while</span> (!transferForSignal(first) &amp;&amp;</span><br><span class="line">       (first = firstWaiter) != <span class="keyword">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Java多线程基础" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">Java多线程基础</a>
-    </h1>
   
 
-        
-        <a href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Java多线程基础"><a href="#Java多线程基础" class="headerlink" title="Java多线程基础"></a>Java多线程基础</h1><p>​                 现代程序大多数都是多线程程序，因为目前CPU处理器普遍是多核心的，将程序划分为多线程执行能够充分利用CPU的多个核心，从而提高程序运行的效率。Java作为生命力强悍的语言，其对多线程的支持也是非常优秀的。下面简单总结Java中线程的相关基础知识。</p>
-<h2 id="1-Java线程的介绍以及优势"><a href="#1-Java线程的介绍以及优势" class="headerlink" title="1. Java线程的介绍以及优势"></a>1. Java线程的介绍以及优势</h2><p>​                 在Hotspot VM上，Java线程采用的是内核级线程模型，也就是每个Java线程都对应与一个操作系统线程，由操作系统对线程进行调度和管理。线程相比于进程而言，更加轻量，创建和撤销以及调度的代价较小，并且同一个进程的线程间可以基于共享的地址空间进行直接通信。</p>
-<p>​                 Java程序天生就是多线程的。一个Java程序运行时，往往会伴随许多守护线程的运行。</p>
-<p>​                 合理的多线程程序能够有效的使用多核CPU资源，提高程序的响应时间，并且简化开发的模型。</p>
-<h3 id="1-1-线程的优先级"><a href="#1-1-线程的优先级" class="headerlink" title="1.1 线程的优先级"></a>1.1 线程的优先级</h3><p>​                 在Java中可以在线程构建时调用setPriority(int)方法设置线程的优先级，优先级范围从1到10，默认的线程优先级是5，优先级高的线程理论上分配到的时间片要多于优先级低的线程。</p>
-<p>​                 在设置线程优先级时，对于偏I/O和频繁阻塞的线程应该设置高的优先级，而对于计算型线程应该设置较低的优先级，因为这样可以防止CPU被线程独占。</p>
-<p>​                 但是要注意在不同的JVM以及操作系统上，优先级的设置可能无效。</p>
-<h3 id="1-2-线程的状态"><a href="#1-2-线程的状态" class="headerlink" title="1.2 线程的状态"></a>1.2 线程的状态</h3><table>
-<thead>
-<tr>
-<th>状态名称</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>NEW</td>
-<td>初始状态， 线程被构建但是还没有调用start()方法</td>
-</tr>
-<tr>
-<td>RUNNABLE</td>
-<td>运行状态，相当于操作系统里的就绪和运行态，此时可以或已经分配到时间片</td>
-</tr>
-<tr>
-<td>BLOCKED</td>
-<td>阻塞状态，表示线程阻塞在锁上</td>
-</tr>
-<tr>
-<td>WAITING</td>
-<td>等待状态，表示线程在等待某些条件，直到其他线程将其唤醒</td>
-</tr>
-<tr>
-<td>TIME_WAITING</td>
-<td>超时等待，类似等待状态，不过在经历一个时间段后线程会自动退出等待</td>
-</tr>
-<tr>
-<td>TERMINATED</td>
-<td>终止状态，表示线程执行完毕</td>
-</tr>
-</tbody></table>
-<h3 id="1-3-守护线程"><a href="#1-3-守护线程" class="headerlink" title="1.3 守护线程"></a>1.3 守护线程</h3><p>​                 Daemon线程又称守护线程，主要执行一些后台调度以及支持性的工作。当JVM中不存在非守护线程时，JVM将会结束运行。Java里常见的守护线程有，GC线程，Finalize线程等</p>
-<p>​                 设置一个线程为守护线程的方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thread t = <span class="keyword">new</span> Thread(..., <span class="string">&quot;name&quot;</span>);</span><br><span class="line">t.setDaemon(<span class="keyword">true</span>);</span><br><span class="line"><span class="comment">//设置守护线程的操作必须在启动线程之前</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-启动和终止线程"><a href="#2-启动和终止线程" class="headerlink" title="2. 启动和终止线程"></a>2. 启动和终止线程</h2><p>​                 线程的启动通过调用start方法，直到run方法执行完毕，线程结束运行。</p>
-<h3 id="2-1-构造线程"><a href="#2-1-构造线程" class="headerlink" title="2.1 构造线程"></a>2.1 构造线程</h3><p>​                 运行线程之前会先进行线程的构造。从Java中Thread的源码中我们知道，子线程的构造工作由父线程完成，子线程继承父线程的Daemon属性，优先级，可继承的ThreadLocal变量以及资源加载器等。</p>
-<h3 id="2-2-启动线程"><a href="#2-2-启动线程" class="headerlink" title="2.2 启动线程"></a>2.2 启动线程</h3><p>​                 父线程调用调用子线程的start方法告知JVM启动子线程。</p>
-<h3 id="2-3-中断的理解"><a href="#2-3-中断的理解" class="headerlink" title="2.3 中断的理解"></a>2.3 中断的理解</h3><p>​                 中断可以理解为线程的一个标志位属性，其他线程可以设置这个标志位，通知你已被打断。线程调用自身的isInterrupted方法检查中断标志位。</p>
-<h2 id="3-线程间通信"><a href="#3-线程间通信" class="headerlink" title="3. 线程间通信"></a>3. 线程间通信</h2><h3 id="3-1-volatile和synchronized"><a href="#3-1-volatile和synchronized" class="headerlink" title="3.1 volatile和synchronized"></a>3.1 volatile和synchronized</h3><p>​                 关键字volatile可以修饰字段，保证所有线程对该字段的可见性以及禁止重排序，具体实现原理参考JMM部分的总结。</p>
-<p>​                 关键字synchronized可以修饰方法或者代码块，保证同一时刻只有一个线程能够进入临界区，确保临界区内共享变量修改的可见性和排他性以及禁止重排序。</p>
-<p>​                 synchronized的实现背后基于Java的对象锁。在Java中每个对象都可以作为锁，并且一个对象作为锁则编译器会产生对应的管程来控制对该对象锁的操作。synchronized的排他性是基于锁的happen-before规则，线程释放锁的操作先行发生于其他线程获取锁的操作，这样确保了synchronized的排他性以及可见性。</p>
-<h3 id="3-2-使用管道输入输出流进行线程间通信"><a href="#3-2-使用管道输入输出流进行线程间通信" class="headerlink" title="3.2 使用管道输入输出流进行线程间通信"></a>3.2 使用管道输入输出流进行线程间通信</h3><p>​                 管道的传输媒介是内存。在Java中管道输入输出有四种实现方式：PipedOutputStream、PipedInputStream、PipedWriter、PipedReader。其中前两种面向字节，后两种面向字符。</p>
-<p>​                 注意在使用管道时，要将输入和输出流进行绑定。</p>
-<h3 id="3-3-ThreadLocal"><a href="#3-3-ThreadLocal" class="headerlink" title="3.3 ThreadLocal"></a>3.3 ThreadLocal</h3><p>​                 ThreadLocal即线程变量，是一个以ThreadLocal对象为键，任意对象为值的数据结构，一般被绑定在线程上，其他线程可以通过这个对象获取到特定线程存储的信息。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-hello-world" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/05/hello-world/">Hello World</a>
-    </h1>
   
 
-        
-        <a href="/2021/08/05/hello-world/" class="archive-article-date">
-  	<time datetime="2021-08-05T15:30:58.146Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/05/hello-world/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
 
 
@@ -635,8 +376,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
