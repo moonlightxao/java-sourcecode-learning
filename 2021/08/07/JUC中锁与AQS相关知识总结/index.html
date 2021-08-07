@@ -16,7 +16,7 @@
 <meta property="og:description" content="JUC中锁与AQS相关知识总结">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-08-07T12:15:30.000Z">
-<meta property="article:modified_time" content="2021-08-07T12:20:44.386Z">
+<meta property="article:modified_time" content="2021-08-07T12:43:09.126Z">
 <meta property="article:author" content="MoonLight">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JUC">
@@ -178,6 +178,8 @@
       
         <h1 id="JUC中锁与AQS相关知识总结"><a href="#JUC中锁与AQS相关知识总结" class="headerlink" title="JUC中锁与AQS相关知识总结"></a>JUC中锁与AQS相关知识总结</h1><h2 id="1-Lock接口"><a href="#1-Lock接口" class="headerlink" title="1. Lock接口"></a>1. Lock接口</h2><p>​              在Java5之前，要想使用锁来保护共享资源大多数情况是使用synchronized关键字。在Java5之后，并发包里增加了Lock接口及其实现类来提供锁的功能。</p>
 <p>​              Lock接口与synchronized有许多区别。synchronized修饰在方法体或者代码块上可以隐式地获取和释放锁，并且锁地获取和释放操作被固化。但是Lock接口可以显示地获取和释放锁，提高了锁的可操作性。并且Lock接口支持可中断锁以及超时锁等synchronized没有的特性。</p>
+<span id="more"></span>
+
 <p>​              Lock接口的使用范式如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Lock lock = <span class="keyword">new</span> ReentrantLock();</span><br><span class="line">lock.lock();</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line"><span class="comment">//访问临界区</span></span><br><span class="line">&#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">lock.unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -485,6 +487,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">ReentrantLock</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">synchronized</a>
               </li>
             
             <div class="clearfix"></div>

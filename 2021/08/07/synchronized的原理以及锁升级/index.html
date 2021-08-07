@@ -6,16 +6,21 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>MoonLight的博客</title>
+  <title>synchronized的原理以及锁升级 | MoonLight的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京理工大学18级软件工程，喜欢Java后端技术">
-<meta property="og:type" content="website">
-<meta property="og:title" content="MoonLight的博客">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="主要从操作系统层面以及JMM层面讲解synchronized的原理以及锁升级">
+<meta property="og:type" content="article">
+<meta property="og:title" content="synchronized的原理以及锁升级">
+<meta property="og:url" content="http://example.com/2021/08/07/synchronized%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E9%94%81%E5%8D%87%E7%BA%A7/index.html">
 <meta property="og:site_name" content="MoonLight的博客">
-<meta property="og:description" content="南京理工大学18级软件工程，喜欢Java后端技术">
+<meta property="og:description" content="主要从操作系统层面以及JMM层面讲解synchronized的原理以及锁升级">
 <meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-08-07T12:41:51.000Z">
+<meta property="article:modified_time" content="2021-08-07T12:42:26.693Z">
 <meta property="article:author" content="MoonLight">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JUC">
+<meta property="article:tag" content="synchronized">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="MoonLight的博客" type="application/atom+xml">
@@ -152,16 +157,14 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-    <article id="post-synchronized的原理以及锁升级" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+            <article id="post-synchronized的原理以及锁升级" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/synchronized%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E9%94%81%E5%8D%87%E7%BA%A7/">synchronized的原理以及锁升级</a>
+    <h1 class="article-title" itemprop="name">
+      synchronized的原理以及锁升级
     </h1>
   
 
@@ -175,11 +178,37 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="synchronized的原理以及锁升级"><a href="#synchronized的原理以及锁升级" class="headerlink" title="synchronized的原理以及锁升级"></a>synchronized的原理以及锁升级</h1><h2 id="1-synchronized的原理"><a href="#1-synchronized的原理" class="headerlink" title="1. synchronized的原理"></a>1. synchronized的原理</h2><p>​              利用synchronized可以实现同步功能。众所周知，Java中每个对象都可以作为锁。具体来说，对于synchronized修饰普通方法，锁是当前实例对象。而对于修饰静态方法，锁是当前类的Class对象，对于修饰同步代码块，锁是括号里的对象。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/synchronized%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E9%94%81%E5%8D%87%E7%BA%A7/#more">more >></a>
-        
+<span id="more"></span>
+
+<p>​              从JVM的角度来看，其使用monitorenter和monitorexit指令进入monitor，也就是管程，来获得和释放锁。管程是一种由编译器生成的数据结构，包含了一些属性和管程方法。当一个管程被持有时，将会处于锁定状态。线程在执行到monitorenter指令时候会尝试去获取管程的所有权，即尝试获取锁。</p>
+<p>​              synchronized所使用的锁存储在对象头里。</p>
+<h2 id="2-锁升级和对比"><a href="#2-锁升级和对比" class="headerlink" title="2. 锁升级和对比"></a>2. 锁升级和对比</h2><p>​              从Java6开始，为了减少锁获取与释放的性能消耗，引入了偏向锁和轻量级锁。至此Java中的锁有四种状态：无锁，偏向锁，轻量级锁，重量级锁。这四个状态会随着竞争的情况而升级，但是不能降级。</p>
+<h3 id="2-1-偏向锁"><a href="#2-1-偏向锁" class="headerlink" title="2.1 偏向锁"></a>2.1 偏向锁</h3><p>​              偏向锁的使用场景是：锁在大多数情况下没有其他线程竞争，而且总是由同一个线程获得。</p>
+<p>​              偏向锁的获取过程是：当一个线程尝试获取偏向锁时，先检查</p>
+
       
 
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
       
     </div>
     <div class="article-info article-info-index">
@@ -218,16 +247,75 @@
 
 
       
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/synchronized%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E9%94%81%E5%8D%87%E7%BA%A7/">展开全文 >></a>
-        </p>
-      
 
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/08/07/synchronized%E7%9A%84%E5%8E%9F%E7%90%86%E4%BB%A5%E5%8F%8A%E9%94%81%E5%8D%87%E7%BA%A7/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
       
       <div class="clearfix"></div>
     </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">ReentrantLock总结以及原理分析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -247,286 +335,14 @@
 
 
 
-
   
-    <article id="post-ReentrantLock总结以及原理分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">ReentrantLock总结以及原理分析</a>
-    </h1>
   
 
-        
-        <a href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:22:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="ReentrantLock总结以及原理分析"><a href="#ReentrantLock总结以及原理分析" class="headerlink" title="ReentrantLock总结以及原理分析"></a>ReentrantLock总结以及原理分析</h1><p>​                  ReentrantLock是一种支持可重入，公平与非公平，中断敏感，超时获取的锁。ReentrantLock与synchronized类似，都支持锁重入，但是synchronized是隐式重入，ReentrantLock调用lock方法可以显式重入，更加灵活。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ReentrantLock</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-JUC中锁与AQS相关知识总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">JUC中锁与AQS相关知识总结</a>
-    </h1>
   
 
-        
-        <a href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="JUC中锁与AQS相关知识总结"><a href="#JUC中锁与AQS相关知识总结" class="headerlink" title="JUC中锁与AQS相关知识总结"></a>JUC中锁与AQS相关知识总结</h1><h2 id="1-Lock接口"><a href="#1-Lock接口" class="headerlink" title="1. Lock接口"></a>1. Lock接口</h2><p>​              在Java5之前，要想使用锁来保护共享资源大多数情况是使用synchronized关键字。在Java5之后，并发包里增加了Lock接口及其实现类来提供锁的功能。</p>
-<p>​              Lock接口与synchronized有许多区别。synchronized修饰在方法体或者代码块上可以隐式地获取和释放锁，并且锁地获取和释放操作被固化。但是Lock接口可以显示地获取和释放锁，提高了锁的可操作性。并且Lock接口支持可中断锁以及超时锁等synchronized没有的特性。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Java多线程基础" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">Java多线程基础</a>
-    </h1>
   
 
-        
-        <a href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Java多线程基础"><a href="#Java多线程基础" class="headerlink" title="Java多线程基础"></a>Java多线程基础</h1><p>​                 现代程序大多数都是多线程程序，因为目前CPU处理器普遍是多核心的，将程序划分为多线程执行能够充分利用CPU的多个核心，从而提高程序运行的效率。Java作为生命力强悍的语言，其对多线程的支持也是非常优秀的。下面简单总结Java中线程的相关基础知识。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
 
 
@@ -549,8 +365,8 @@
     <script>
 	var yiliaConfig = {
 		mathjax: false,
-		isHome: true,
-		isPost: false,
+		isHome: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
