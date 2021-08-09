@@ -16,7 +16,7 @@
 <meta property="og:description" content="主要从操作系统层面以及JMM层面讲解synchronized的原理以及锁升级">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-08-07T12:41:51.000Z">
-<meta property="article:modified_time" content="2021-08-07T12:42:26.693Z">
+<meta property="article:modified_time" content="2021-08-08T06:35:20.417Z">
 <meta property="article:author" content="MoonLight">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JUC">
@@ -183,8 +183,40 @@
 <p>​              从JVM的角度来看，其使用monitorenter和monitorexit指令进入monitor，也就是管程，来获得和释放锁。管程是一种由编译器生成的数据结构，包含了一些属性和管程方法。当一个管程被持有时，将会处于锁定状态。线程在执行到monitorenter指令时候会尝试去获取管程的所有权，即尝试获取锁。</p>
 <p>​              synchronized所使用的锁存储在对象头里。</p>
 <h2 id="2-锁升级和对比"><a href="#2-锁升级和对比" class="headerlink" title="2. 锁升级和对比"></a>2. 锁升级和对比</h2><p>​              从Java6开始，为了减少锁获取与释放的性能消耗，引入了偏向锁和轻量级锁。至此Java中的锁有四种状态：无锁，偏向锁，轻量级锁，重量级锁。这四个状态会随着竞争的情况而升级，但是不能降级。</p>
-<h3 id="2-1-偏向锁"><a href="#2-1-偏向锁" class="headerlink" title="2.1 偏向锁"></a>2.1 偏向锁</h3><p>​              偏向锁的使用场景是：锁在大多数情况下没有其他线程竞争，而且总是由同一个线程获得。</p>
-<p>​              偏向锁的获取过程是：当一个线程尝试获取偏向锁时，先检查</p>
+<h3 id="2-1-偏向锁"><a href="#2-1-偏向锁" class="headerlink" title="2.1 偏向锁"></a>2.1 偏向锁</h3><p>​              偏向锁的使用场景：锁在大多数情况下没有其他线程竞争，而且总是由同一个线程获得。</p>
+<p>​              偏向锁的获取过程：当一个线程尝试获取偏向锁时，会在自己的栈帧里的锁记录和锁对象对象头里记录自己的线程ID。当下次在获取锁时就不需要CAS操作，只需要检查对象头的线程ID是不是自己的线程ID。</p>
+<p>​              偏向锁的释放过程：只有当出现竞争时偏向锁才会释放。竞争偏向锁的线程首先会暂停拥有锁的线程，并检查拥有锁的线程是否存活，如果还存活，则执行拥有锁线程的栈帧，直到最后有锁记录的栈帧执行完，根据是否超过阈值决定时标记对象不适合作为偏向锁，还是将对象恢复到无锁状态。如果不存活，则将对象头设置为无锁状态。当偏向锁处于无锁状态时，线程可以用CAS去竞争锁，也就是将自己的线程ID写入锁对象的对象头。</p>
+<h3 id="2-2-轻量级锁"><a href="#2-2-轻量级锁" class="headerlink" title="2.2 轻量级锁"></a>2.2 轻量级锁</h3><p>​              轻量级锁的使用场景：追求线程响应时间，或者多个线程竞争锁时间是错开的情况。</p>
+<p>​              轻量级锁的获取过程：线程在获取轻量级锁时，会在栈帧中创建存储锁记录的空间，并将锁对象头的Mark Word复制到锁记录中。之后线程尝试用CAS将对象头原本的Mark Word替换成指向锁记录的指针。如果CAS替换成功表示竞争到锁，替换失败则自旋CAS尝试再次获取锁。</p>
+<p>​              轻量级锁的释放过程：持有锁的线程在释放轻量级锁时，会用CAS将锁记录里的Markd Word替换到对象头，如果CAS替换成功，则轻量级锁释放成功。替换失败则说明存在竞争，锁升级为重量级锁，原本持有轻量级锁的线程会释放锁，并唤醒被阻塞的其他线程，之后重新竞争重量级锁。</p>
+<h3 id="2-3-三种锁的比较"><a href="#2-3-三种锁的比较" class="headerlink" title="2.3 三种锁的比较"></a>2.3 三种锁的比较</h3><table>
+<thead>
+<tr>
+<th align="center">锁类型</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+<th align="center">使用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">偏向锁</td>
+<td align="center">只在第一次获取锁使用CAS，之后再获取锁不需要额外的CAS开销</td>
+<td align="center">如果锁存在竞争，会带来额外的锁撤销消耗</td>
+<td align="center">适用于大多数时间只有一个线程持有锁的场景</td>
+</tr>
+<tr>
+<td align="center">轻量级锁</td>
+<td align="center">竞争锁的线程不会被阻塞，而是自旋CAS尝试获取锁</td>
+<td align="center">自旋的过程会浪费CPU资源</td>
+<td align="center">追求响应时间，或者竞争时间大多数错开的情况</td>
+</tr>
+<tr>
+<td align="center">重量级锁</td>
+<td align="center">线程不自旋消耗CPU资源</td>
+<td align="center">线程会被阻塞，降低了响应时间</td>
+<td align="center">追求吞吐量</td>
+</tr>
+</tbody></table>
 
       
 
@@ -307,6 +339,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2021/08/08/JMM%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          (no title)
+        
+      </div>
+    </a>
   
   
     <a href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" id="article-nav-older" class="article-nav-link-wrap">
