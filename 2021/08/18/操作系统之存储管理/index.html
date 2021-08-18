@@ -6,21 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://example.com">
-  <title>Java多线程基础 | MoonLight的博客</title>
+  <title>操作系统存储管理 | MoonLight的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="主要简单介绍了Java中线程的状态，守护线程，创建和结束线程，ThreadLocal">
+  <meta name="description" content="主要总结了操作系统中空闲内存管理，虚存，页面置换算法等内容">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java多线程基础">
-<meta property="og:url" content="http://example.com/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:title" content="操作系统存储管理">
+<meta property="og:url" content="http://example.com/2021/08/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B9%8B%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/index.html">
 <meta property="og:site_name" content="MoonLight的博客">
-<meta property="og:description" content="主要简单介绍了Java中线程的状态，守护线程，创建和结束线程，ThreadLocal">
+<meta property="og:description" content="主要总结了操作系统中空闲内存管理，虚存，页面置换算法等内容">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-08-07T12:15:30.000Z">
-<meta property="article:modified_time" content="2021-08-07T12:43:19.563Z">
+<meta property="og:image" content="e:/blog/source/assert/存在TLB的访存.png">
+<meta property="article:published_time" content="2021-08-18T13:56:30.000Z">
+<meta property="article:modified_time" content="2021-08-18T13:57:30.657Z">
 <meta property="article:author" content="MoonLight">
-<meta property="article:tag" content="Java">
-<meta property="article:tag" content="JUC">
+<meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="e:/blog/source/assert/存在TLB的访存.png">
   
     <link rel="alternative" href="/atom.xml" title="MoonLight的博客" type="application/atom+xml">
   
@@ -156,81 +157,108 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-Java多线程基础" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-操作系统之存储管理" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Java多线程基础
+      操作系统存储管理
     </h1>
   
 
         
-        <a href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
+        <a href="/2021/08/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B9%8B%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/" class="archive-article-date">
+  	<time datetime="2021-08-18T13:56:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-18</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Java多线程基础"><a href="#Java多线程基础" class="headerlink" title="Java多线程基础"></a>Java多线程基础</h1><p>​                 现代程序大多数都是多线程程序，因为目前CPU处理器普遍是多核心的，将程序划分为多线程执行能够充分利用CPU的多个核心，从而提高程序运行的效率。Java作为生命力强悍的语言，其对多线程的支持也是非常优秀的。下面简单总结Java中线程的相关基础知识。</p>
-<span id="more"></span>
+        <h1 id="操作系统存储管理"><a href="#操作系统存储管理" class="headerlink" title="操作系统存储管理"></a>操作系统存储管理</h1><p>​                内存作为计算机中CPU进行计算时直接访问的部分，在计算机里占有非常重要的地位。目前随着计算机的发展，内存的容量也得到极大的提升，但是现实的情况却是，程序运行时所需要的存储空间远远超过了内存的容量，并且内存与外村的速度，CPU与存储器件的速度差异过大。为了解决这个问题，人们提出了分层存储体系的概念。</p>
+<p>​                操作系统一个重要的任务就是管理分层存储，在操作系统中这部分称为存储管理器，存储管理器最重要的任务就是对内存进行管理，即记录哪些内存正在使用，哪些内存可以使用，如何为进程分配内存，如何在进程结束后释放内存。</p>
+<p>​                伴随着操作系统的存储管理器发展，提出了许多管理的解决方案，早期比较简单的有无存储抽象，即程序直接访问物理地址，到后来由于无存储抽象会导致诸多问题，从而发展出了有存储抽象，即程序访问虚拟地址进行访存的方式。</p>
+<!---more--->
 
-<h2 id="1-Java线程的介绍以及优势"><a href="#1-Java线程的介绍以及优势" class="headerlink" title="1. Java线程的介绍以及优势"></a>1. Java线程的介绍以及优势</h2><p>​                 在Hotspot VM上，Java线程采用的是内核级线程模型，也就是每个Java线程都对应与一个操作系统线程，由操作系统对线程进行调度和管理。线程相比于进程而言，更加轻量，创建和撤销以及调度的代价较小，并且同一个进程的线程间可以基于共享的地址空间进行直接通信。</p>
-<p>​                 Java程序天生就是多线程的。一个Java程序运行时，往往会伴随许多守护线程的运行。</p>
-<p>​                 合理的多线程程序能够有效的使用多核CPU资源，提高程序的响应时间，并且简化开发的模型。</p>
-<h3 id="1-1-线程的优先级"><a href="#1-1-线程的优先级" class="headerlink" title="1.1 线程的优先级"></a>1.1 线程的优先级</h3><p>​                 在Java中可以在线程构建时调用setPriority(int)方法设置线程的优先级，优先级范围从1到10，默认的线程优先级是5，优先级高的线程理论上分配到的时间片要多于优先级低的线程。</p>
-<p>​                 在设置线程优先级时，对于偏I/O和频繁阻塞的线程应该设置高的优先级，而对于计算型线程应该设置较低的优先级，因为这样可以防止CPU被线程独占。</p>
-<p>​                 但是要注意在不同的JVM以及操作系统上，优先级的设置可能无效。</p>
-<h3 id="1-2-线程的状态"><a href="#1-2-线程的状态" class="headerlink" title="1.2 线程的状态"></a>1.2 线程的状态</h3><table>
+<h2 id="1-无存储抽象"><a href="#1-无存储抽象" class="headerlink" title="1. 无存储抽象"></a>1. 无存储抽象</h2><p>​                无存储抽象的内存管理方式简单来说，就是每一个程序都可以直接访问物理内存地址。这种模型对于操作系统实现简单，但是会带来一些问题。</p>
+<p>​                首先最主要的问题就是访存冲突。因为同一时刻内存中只能装入一个程序，如果内存中同时装有多个程序，则不同的程序可能会出现访问同一物理地址的冲突。其次采用无存储抽象的方式来管理内存，基本上无法实现多进程，虽然可以按照多线程的方式使用内存，但是多线程毕竟与多进程存在本质上的差别。</p>
+<h2 id="2-存储抽象-地址空间"><a href="#2-存储抽象-地址空间" class="headerlink" title="2. 存储抽象:地址空间"></a>2. 存储抽象:地址空间</h2><p>​                要确保多个程序能同时出现在内存中，必须要解决两个问题: 保护和重定向，保护即保护进程正在使用的内存块，而重定向则是不同进程如何确定自己使用的内存地址。</p>
+<p>​                解决这两个问题的一个较好的办法就是将内存地址抽象，由此引出地址空间的概念。<strong>地址空间是一个进程可以用于内存寻址的地址集合，并且这个地址集合是进程私有的</strong>。类似于操作系统为运行的程序进行抽象得到进程，地址空间就是操作系统对内存的一种抽象。</p>
+<p>​                有了地址空间，不同进程就能同时出现在内存中，但是如何给进程分配私有的地址空间呢？一个比较简单的方法是采用基址寄存器和界限寄存器。利用基址寄存器和界限寄存器能够简单的把进程的地址空间映射到不同的物理内存上。基址寄存器保存进程的基地址，操作系统在获取到进程要访问的地址时，自动的把基址寄存器的值与该地址相加，并且检查结果地址是否超出界限寄存器的值，没超过则将结果送到地址总线中，从而寻址。利用基址寄存器和界限寄存器存在一些缺点，比如要进行大量的多余加法和比较操作。</p>
+<h2 id="3-交换技术与虚拟内存"><a href="#3-交换技术与虚拟内存" class="headerlink" title="3. 交换技术与虚拟内存"></a>3. 交换技术与虚拟内存</h2><p>​                在现实世界中，往往一台计算机要同时运行几十，乃至上百个进程，并且这些进程需要的内存容量往往远远大于实际的物理内存容量，这一问题即<strong>内存超载</strong>。</p>
+<p>​                有两种通用的解决内存超载的方法。第一种是利用交换技术，即把一个进程完整调入内存，在经过一段时间或者一些条件下，将该进程存回磁盘(即挂起)，同时将其他进程完整调入内存。第二种是利用虚拟内存技术，即将每个进程拥有的地址空间分块，将这些块与物理内存中的块对应，从而每次只需要将程序的一部分块调入内存。</p>
+<h3 id="3-1-交换技术"><a href="#3-1-交换技术" class="headerlink" title="3.1 交换技术"></a>3.1 交换技术</h3><p>​                交换技术的过程如上述，这里具体讲讲交换技术的一些细节。</p>
+<p>​                <strong>交换的过程可能会导致内存碎片的问题，由于每次交换时给进程分配的内存大小不一定一样，故可能会出现许多空闲区，当小的空闲区过多时，会导致新的进程无法被装入内存，这一问题称为“内存空洞”</strong>。解决“内存空洞”的一种方法是把所有进程占用的空间进行规整处理，但是这样会消耗大量的CPU资源。</p>
+<p>​                交换技术存在的另外一个问题，就是如何管理空闲内存分配。大多数情况下，程序需要的内存不是固定大小的，这个时候就需要内存管理为进程稍微分配多一点内存，但是这样提前分配多的内存也可能存在内存浪费的情况。为了解决这一问题，操作系统采用两种方式跟踪空闲内存。</p>
+<p>​                第一种方式是采用位图。内存被划分成许多分配单元，每个分配单元对应于位图中的一位，位图中的一位有两种状态，空闲和占用。位图的优点是占用内存空间小，缺点是存在内存浪费，且查找空闲区的效率比较低。</p>
+<p>​                第二种方式是采用链表存储。链表的结点保存四个信息：空闲/进程段标志，起始地址，长度，下一个结点的指针。当新的进程需要被换入内存时，遍历链表找到大小合适的结点。当进程被换出内存时，检查相邻结点是否为空闲结点，是的话结点合并。</p>
+<h4 id="3-1-1-空闲内存管理技术"><a href="#3-1-1-空闲内存管理技术" class="headerlink" title="3.1.1 空闲内存管理技术"></a>3.1.1 空闲内存管理技术</h4><p>​                如果采用链表的方式管理空闲内存，并且链表的地址是顺序排列的话，则存在许多算法能在一定程度上提高空闲内存分配和收集的效率。</p>
+<table>
 <thead>
 <tr>
-<th>状态名称</th>
-<th>说明</th>
+<th>名称</th>
+<th>过程</th>
+<th>优缺点</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>NEW</td>
-<td>初始状态， 线程被构建但是还没有调用start()方法</td>
+<td>首次适配算法(first fit)</td>
+<td>每次从链表头开始搜索，直到找到一个足够大的空闲结点</td>
+<td>查找效率高，但是可能产生内存碎片</td>
 </tr>
 <tr>
-<td>RUNNABLE</td>
-<td>运行状态，相当于操作系统里的就绪和运行态，此时可以或已经分配到时间片</td>
+<td>下次适配算法(next fit)</td>
+<td>首次适配算法改进版本，不再每次从头开始搜索链表，而是从上次搜素结束的位置开始</td>
+<td>查找效率没有首次适配高</td>
 </tr>
 <tr>
-<td>BLOCKED</td>
-<td>阻塞状态，表示线程阻塞在锁上</td>
+<td>最佳适配算法(best fit)</td>
+<td>每次搜索整个链表，找出能容纳进程的最小空闲结点</td>
+<td>查找效率较高，但是会产生大量小的内存碎片</td>
 </tr>
 <tr>
-<td>WAITING</td>
-<td>等待状态，表示线程在等待某些条件，直到其他线程将其唤醒</td>
+<td>最差适配算法(worst fit)</td>
+<td>每次搜索整个链表，找出能容纳进程的最大空闲结点</td>
+<td>反而会产生大的内存碎片</td>
 </tr>
 <tr>
-<td>TIME_WAITING</td>
-<td>超时等待，类似等待状态，不过在经历一个时间段后线程会自动退出等待</td>
-</tr>
-<tr>
-<td>TERMINATED</td>
-<td>终止状态，表示线程执行完毕</td>
+<td>快速适配算法(fast fit)</td>
+<td>使用线性表维护一些经常使用的大小的空闲链表，例如线性表大小为n，第一项保存大小为2KB的空闲链表，第二项保存大小为4KB的。每次为进程查找空闲内存时，找到表里最符合的空闲链表即可</td>
+<td>由于分开维护空闲链表和进程表，在进程被换出时合并空闲结点比较麻烦</td>
 </tr>
 </tbody></table>
-<h3 id="1-3-守护线程"><a href="#1-3-守护线程" class="headerlink" title="1.3 守护线程"></a>1.3 守护线程</h3><p>​                 Daemon线程又称守护线程，主要执行一些后台调度以及支持性的工作。当JVM中不存在非守护线程时，JVM将会结束运行。Java里常见的守护线程有，GC线程，Finalize线程等</p>
-<p>​                 设置一个线程为守护线程的方法如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Thread t = <span class="keyword">new</span> Thread(..., <span class="string">&quot;name&quot;</span>);</span><br><span class="line">t.setDaemon(<span class="keyword">true</span>);</span><br><span class="line"><span class="comment">//设置守护线程的操作必须在启动线程之前</span></span><br><span class="line">t.start();</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-启动和终止线程"><a href="#2-启动和终止线程" class="headerlink" title="2. 启动和终止线程"></a>2. 启动和终止线程</h2><p>​                 线程的启动通过调用start方法，直到run方法执行完毕，线程结束运行。</p>
-<h3 id="2-1-构造线程"><a href="#2-1-构造线程" class="headerlink" title="2.1 构造线程"></a>2.1 构造线程</h3><p>​                 运行线程之前会先进行线程的构造。从Java中Thread的源码中我们知道，子线程的构造工作由父线程完成，子线程继承父线程的Daemon属性，优先级，可继承的ThreadLocal变量以及资源加载器等。</p>
-<h3 id="2-2-启动线程"><a href="#2-2-启动线程" class="headerlink" title="2.2 启动线程"></a>2.2 启动线程</h3><p>​                 父线程调用调用子线程的start方法告知JVM启动子线程。</p>
-<h3 id="2-3-中断的理解"><a href="#2-3-中断的理解" class="headerlink" title="2.3 中断的理解"></a>2.3 中断的理解</h3><p>​                 中断可以理解为线程的一个标志位属性，其他线程可以设置这个标志位，通知你已被打断。线程调用自身的isInterrupted方法检查中断标志位。</p>
-<h2 id="3-线程间通信"><a href="#3-线程间通信" class="headerlink" title="3. 线程间通信"></a>3. 线程间通信</h2><h3 id="3-1-volatile和synchronized"><a href="#3-1-volatile和synchronized" class="headerlink" title="3.1 volatile和synchronized"></a>3.1 volatile和synchronized</h3><p>​                 关键字volatile可以修饰字段，保证所有线程对该字段的可见性以及禁止重排序，具体实现原理参考JMM部分的总结。</p>
-<p>​                 关键字synchronized可以修饰方法或者代码块，保证同一时刻只有一个线程能够进入临界区，确保临界区内共享变量修改的可见性和排他性以及禁止重排序。</p>
-<p>​                 synchronized的实现背后基于Java的对象锁。在Java中每个对象都可以作为锁，并且一个对象作为锁则编译器会产生对应的管程来控制对该对象锁的操作。synchronized的排他性是基于锁的happen-before规则，线程释放锁的操作先行发生于其他线程获取锁的操作，这样确保了synchronized的排他性以及可见性。</p>
-<h3 id="3-2-使用管道输入输出流进行线程间通信"><a href="#3-2-使用管道输入输出流进行线程间通信" class="headerlink" title="3.2 使用管道输入输出流进行线程间通信"></a>3.2 使用管道输入输出流进行线程间通信</h3><p>​                 管道的传输媒介是内存。在Java中管道输入输出有四种实现方式：PipedOutputStream、PipedInputStream、PipedWriter、PipedReader。其中前两种面向字节，后两种面向字符。</p>
-<p>​                 注意在使用管道时，要将输入和输出流进行绑定。</p>
-<h3 id="3-3-ThreadLocal"><a href="#3-3-ThreadLocal" class="headerlink" title="3.3 ThreadLocal"></a>3.3 ThreadLocal</h3><p>​                 ThreadLocal即线程变量，是一个以ThreadLocal对象为键，任意对象为值的数据结构，一般被绑定在线程上，其他线程可以通过这个对象获取到特定线程存储的信息。</p>
+<h3 id="3-2-虚拟内存"><a href="#3-2-虚拟内存" class="headerlink" title="3.2 虚拟内存"></a>3.2 虚拟内存</h3><p>​                解决内存超载的另一个重要的方式是虚拟内存。虚拟内存是将地址空间划分为一个个固定大小的块，每个块又称为页面，而与页面对应的是物理内存中的块，称为页框。在进程使用到某地址时，首先检查该地址对应的页面是否在物理内存中有对应的页框，如果有，则直接将该地址映射到页框，如果没有，则发生缺页中断，丢弃物理内存中一个页框，并将该地址对应的页面放入物理内存中。</p>
+<p>​                早期没有虚拟内存的时候，一些大型计算机是采用 <strong>“覆盖技术”</strong> ，将程序划分为一个个模块，每次装入一部分模块到内存中运行，模块在内存中运行结束或者需要引入新的模块时，进行模块的置换。但是覆盖技术要求程序员将程序进行模块划分，对于目前复杂的程序而言，划分程序是一件十分繁杂的工作。所以操作系统采用虚拟内存技术，由操作系统把程序的地址空间进行划分，简化了程序员的工作量。</p>
+<p>​                虚拟内存系统使用到了分页技术。<strong>程序访问的地址称为虚拟地址(virtual address)<strong>，</strong>由虚拟地址构成的集合称为虚拟地址空间</strong>。在采用虚拟内存的系统上，虚拟地址不是直接放入到地址总线，而是经过内存管理单元(MMU，一种特殊的硬件)，由内存管理单元将虚拟地址映射称为真实地址。具体时如何映射的呢？</p>
+<p>​                在MMU中保存了一种称为页表的数据结构**(页表可以由一组寄存器实现，也可以保存在内存中)**，页表的每一项存有页面号，对应的页框号，以及一些辅助位(比如在/不在位，修改位，访问位，保护位，禁止高速缓存位)。程序产生的虚拟地址被划分为两部分，一部分是页面号，用来作为页表的索引，一部分则是偏移量。虚拟地址被送入MMU之后，MMU根据页面号查找相应的页表项。如果该页面存在相应的页框，则检查保护位，确保操作满足权限，之后修改页表项的访问位为1，并得到相应的页框号，将页框号与虚拟地址的偏移量部分结合，得到真实地址，之后把真实地址送入地址总线。如果该页面不存在相应的页框，则触发缺页中断，执行页面置换算法，最后将得到的页框号与偏移量结合，把真实地址送入地址总线。</p>
+<h3 id="3-3-提高虚拟内存的效率"><a href="#3-3-提高虚拟内存的效率" class="headerlink" title="3.3 提高虚拟内存的效率"></a>3.3 提高虚拟内存的效率</h3><p>​                虚拟内存可以有效解决内存超载的问题，但是当页表过大时，会导致分页查找速度变慢的问题，同时目前进程所需地址空间往往很大，其对应的页表也很大，并且每个进程的页表是相互独立的，这就对MMU的空间产生了很大的挑战。</p>
+<h4 id="3-3-1-转换缓存区TLB"><a href="#3-3-1-转换缓存区TLB" class="headerlink" title="3.3.1 转换缓存区TLB"></a>3.3.1 转换缓存区TLB</h4><p>​                提高分页查找速度的一种办法，就是使用一种特殊的硬件设备—-转换检测缓冲区(简称TLB，即快表)。TLB位于MMU中，包含少量的页表项，通过TBL可以直接将页面与页框相对应，而不需要查询页表。</p>
+<p>​                存在快表时的查询过程如流程图所示：</p>
+<p><img src="E:\blog\source\assert\存在TLB的访存.png"></p>
+<h4 id="3-3-2-多级页表和倒排表"><a href="#3-3-2-多级页表和倒排表" class="headerlink" title="3.3.2 多级页表和倒排表"></a>3.3.2 多级页表和倒排表</h4><p>​                针对页表过大的问题有许多解决方案，比较广泛使用的是多级页表和倒排表。</p>
+<p>​                多级页表的主要目标是避免全部页表都在内存之中，特别是一些不经常使用的页表项更不应该出现在内存里。为此多级页表将虚拟地址划分位多个部分，通常情况下是划分为二级或三级页表，即对于32位的虚拟地址，前10位是页表域1，之后10位是页表域2，最后12位是偏移量。多级页表的工作方式是这样的，MMU从虚拟地址中取出VA中域1的10位，作为首级页表的索引，从而从首级页表的页表项得到次级页表地址，根据次级页表地址与域2的10位从次级页表中得到实际的页框号，将页框号与偏移量结合，得到真实地址。采用多级页表能够有效的避免不常使用的页表项占据内存资源。</p>
+<p>​                另外一种解决页表过大的方式是倒排表。倒排表就是将物理内存中的每一个页框作为一个页表项，而不是根据页面作为一个页表项，这样子可以大大减少页表项的数量，不过缺点就是每次查找页表时都需要全表查找。</p>
+<h3 id="3-4-页面置换算法"><a href="#3-4-页面置换算法" class="headerlink" title="3.4 页面置换算法"></a>3.4 页面置换算法</h3><p>​                正如之前提到的，如果操作系统查找页表发现一个进程需要的页面不在内存中，则会触发缺页中断，从内存中选择一个页框，如果该页框在内存中被修改过，则将这个脏的页框写回磁盘中。如果这个页框没有被修改过，则会被直接抛弃，从而将程序需要的页面装入内存中。</p>
+<p>​                关键在于如何选择内存中需要被置换的页框。首先要明确一个前提，页面置换有两种策略，局部置换与全局置换。局部置换即操作系统为每个进程分配固定数量的页面数，进程发生页面置换只会在自己的拥有的页面范围内置换，而全局置换则是操作系统动态决定进程可以分配的页面数。下面讨论页面置换算法为了简单起见，假定都是基于局部置换策略。</p>
+<h4 id="3-4-1-最优页面置换算法-Optimal"><a href="#3-4-1-最优页面置换算法-Optimal" class="headerlink" title="3.4.1 最优页面置换算法(Optimal)"></a>3.4.1 最优页面置换算法(Optimal)</h4><p>​                最优页面置换算法的思想是，置换最晚被使用的页面。最优页面置换算法需要操作系统知道一个页面在首次被使用之前需要执行多少条指令，指令数越大，说明这个页面越晚被使用。但是最优页面置换算法是无法实现的，因为操作系统无法知道一个页面在首次被使用之前，需要执行多少指令。不过最优页面置换算法可以用来衡量其他页面置换算法的效率。</p>
+<h4 id="3-4-2-最近未使用页面置换算法-Not-Recently-Used"><a href="#3-4-2-最近未使用页面置换算法-Not-Recently-Used" class="headerlink" title="3.4.2 最近未使用页面置换算法(Not Recently Used)"></a>3.4.2 最近未使用页面置换算法(Not Recently Used)</h4><p>​                最近未使用算法利用页表项中的访问位(R位)，修改位(M位)将页面进行划分成四类。第一类是没有被访问也没有被修改(R=0，M=0)，第二类是没有被访问，已被修改(R=0，M=1)，第三类是已被访问，没有被修改(R=1，M=0)，第四类是已被访问且已被修改(R=1，M=1)。当启动一个进程时，其所有页面的页表项R和M同时置为0，并且R位在一定的时钟周期内会被重置为0，操作系统在发生缺页中断时，检查页面的R和M位，根据上面的划分，随机地从编号最小地非空类别里淘汰一个页面。由于在一定时钟周期会重置访问位，故此时淘汰的页面就是最近没有被使用的页面。</p>
+<h4 id="3-4-3-先进先出页面置换算法-First-In-First-Out"><a href="#3-4-3-先进先出页面置换算法-First-In-First-Out" class="headerlink" title="3.4.3 先进先出页面置换算法(First In First Out)"></a>3.4.3 先进先出页面置换算法(First In First Out)</h4><p>​                FIFO算法实现简单，由操作系统维护进程在内存中所有页面的队列，在内存中存在时间最短的页面在队尾，存在时间最长的页面在队头。当发生缺页中断时，淘汰队头的页面，并将新的页面放入队尾。</p>
+<p>​                FIFO的优点是实现简单，缺点是可能淘汰频繁使用的页面从而导致大量缺页中断。</p>
+<h4 id="3-4-4-第二次机会页面置换算法"><a href="#3-4-4-第二次机会页面置换算法" class="headerlink" title="3.4.4 第二次机会页面置换算法"></a>3.4.4 第二次机会页面置换算法</h4><p>​                第二次机会页面置换算法是对FIFO的改进，即每次要发生缺页中断时，先检查队列头页面的访问位，如果访问位为0(在一定时钟周期没有被访问)，则直接抛弃该页面，如果访问位为1，则将访问位改成0，并将这个页面重新加入到队尾。</p>
+<h4 id="3-4-5-时钟页面置换算法"><a href="#3-4-5-时钟页面置换算法" class="headerlink" title="3.4.5 时钟页面置换算法"></a>3.4.5 时钟页面置换算法</h4><p>​                时钟页面置换算法是对第二次机会页面置换算法的改进，由于第二次机会页面置换算法每次都需要移动链表元素，故如果使用环形链表，指针像时针一样依次检查页面是否是最近未使用的页面，则不需要频繁移动链表元素。</p>
+<p>​                操作系统将一个进程在内存里的所有页面用环形链表维护，并且指针指向最老的页面。当发生缺页中断时，检查指针指向页面的访问位，如果为1则置为0，指针指向下一个页面。如果为0则淘汰该页面，并将新页面插入到指针的位置，然后指针指向下一个页面。</p>
+<h4 id="3-4-6-最近最少使用页面置换算法-Least-Recently-Used"><a href="#3-4-6-最近最少使用页面置换算法-Least-Recently-Used" class="headerlink" title="3.4.6 最近最少使用页面置换算法(Least Recently Used)"></a>3.4.6 最近最少使用页面置换算法(Least Recently Used)</h4><p>​                LRU算法是对OPT算法比较好的近似。LRU基于这样的思想，在之前一定数量指令被频繁使用的页面可能在之后的几条指令中被使用。这样在缺页中断发生时，置换未使用时间最长的页面即可。</p>
+<p>​                LRU的实现可以采用硬件和软件的方式。首先谈谈基于硬件实现的LRU算法，一种可行的方式是使用一个计数器，在每条指令执行完后自动加一，同时每个页表项也要有足够的空间保存这个计数器的值。每次访存时，操作系统将当前计数器的值放入页表项里，当发生缺页中断时，选择计数器值最小的页面置换调即可。第二种方式是用硬件维护一个矩阵，对于N个页面，矩阵为NXN，当访问页框k时，将矩阵的k行置为1，k列置为0，这样在发生缺页中断时，行代表的二进制数值最小的页面就是最近最少使用的页面。</p>
+<p>​                而采用软件的方式实现LRU算法，有两种方案，一种是**最不常用置换算法(Not Frequently Used)<strong>，另一种是</strong>老化算法(aging)**。</p>
+<p>​                NFU算法给每个页面维护一个软件计数器，计数器初始值为0。每次时钟中断时，操作系统将内存里页面的页表项R位加到计数器上，这样大致能体现出哪些页面最近最少使用。</p>
+<p>​                老化算法则是在NFU的基础上对计数器的值进行修正。操作系统每次不是直接将内存里页面的页表项R位直接加到计数器上，而是先将计数器的值右移一位，再把R位的值加到计数器值最高二进制位上。</p>
+<p>​                老化算法作为LRU的一种软件实现，优点是实现代价小，缺点是可能存在多个页面计数器值相同的情况，这样就比较难决定抛弃哪一个页面。</p>
+<h4 id="3-4-7-工作集页面置换算法"><a href="#3-4-7-工作集页面置换算法" class="headerlink" title="3.4.7 工作集页面置换算法"></a>3.4.7 工作集页面置换算法</h4><p>​                由程序局部性原理可知，一个进程在运行时只有少量页面是频繁使用的，大多数页面不会频繁使用。</p>
+<p>​                据此可以引出工作集的概念。一个进程的工作集是<strong>指进程最近k次内存访问所使用过的页面集合</strong>。</p>
+<p>​                工作集页面置换算法就是当发生缺页中断时，将内存里不在工作集的页面淘汰。工作集页面置换采用的是预先调入的策略，在进程运行的每个时刻都提前确保工作集内的页面存在于内存中，这样就可以避免大量的缺页中断。</p>
+<p>​                工作集页面置换算法的一种具体实现方式是把工作集设定为过去k秒实际运行时间内进程访问过的页面集合。实际运行时间指进程开始执行到当前实际使用完CPU的时间，例如进程T时刻开始执行，在T+100时刻内使用了40的CPU时间，则其实际运行时间是40。当发生缺页中断时，操作系统扫描进程在内存中的所有页面。如果页面的R位是1，表示当前页面在发生缺页中断时正在被使用，所以该页面明显在工作集中，不应该被置换。如果页面的R位是0，则计算该页面生存时间(生存时间=当前实际运行时间减去页表项中记录的上次使用时间)，如果生存时间大于k，说明该页面不在工作集中，可以被置换，如果小于k说明该页面在工作集里，但是还是需要置换调某个页面，故从所有R位为0的页面里选择上次使用时间最小的页面进行置换。</p>
 
       
 
@@ -265,11 +293,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">操作系统</a>
         		</li>
       		
 		</ul>
@@ -281,7 +305,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
+        			<a href="/categories/操作系统//" class="article-tag-list-link color5">操作系统</a>
         		</li>
       		
 		</ul>
@@ -336,7 +360,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://example.com/2021/08/18/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B9%8B%E5%AD%98%E5%82%A8%E7%AE%A1%E7%90%86/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -350,15 +374,11 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          JUC中锁与AQS相关知识总结
-        
-      </div>
-    </a>
   
+    <a href="/2021/08/17/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">操作系统进程与线程</div>
+      <i class="icon-circle-right"></i>
+    </a>
   
 </nav>
 
