@@ -15,13 +15,13 @@
 <meta property="og:site_name" content="MoonLight的博客">
 <meta property="og:description" content="主要总结了操作系统中空闲内存管理，虚存，页面置换算法等内容">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="e:/blog/source/assert/存在TLB的访存.png">
+<meta property="og:image" content="http://example.com/%E5%AD%98%E5%9C%A8TLB%E7%9A%84%E8%AE%BF%E5%AD%98.png">
 <meta property="article:published_time" content="2021-08-18T13:56:30.000Z">
-<meta property="article:modified_time" content="2021-08-19T07:14:46.669Z">
+<meta property="article:modified_time" content="2021-08-19T14:31:04.248Z">
 <meta property="article:author" content="MoonLight">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="e:/blog/source/assert/存在TLB的访存.png">
+<meta name="twitter:image" content="http://example.com/%E5%AD%98%E5%9C%A8TLB%E7%9A%84%E8%AE%BF%E5%AD%98.png">
   
     <link rel="alternative" href="/atom.xml" title="MoonLight的博客" type="application/atom+xml">
   
@@ -236,7 +236,7 @@
 <h3 id="3-3-提高虚拟内存的效率"><a href="#3-3-提高虚拟内存的效率" class="headerlink" title="3.3 提高虚拟内存的效率"></a>3.3 提高虚拟内存的效率</h3><p>​                虚拟内存可以有效解决内存超载的问题，但是当页表过大时，会导致分页查找速度变慢的问题，同时目前进程所需地址空间往往很大，其对应的页表也很大，并且每个进程的页表是相互独立的，这就对MMU的空间产生了很大的挑战。</p>
 <h4 id="3-3-1-转换缓存区TLB"><a href="#3-3-1-转换缓存区TLB" class="headerlink" title="3.3.1 转换缓存区TLB"></a>3.3.1 转换缓存区TLB</h4><p>​                提高分页查找速度的一种办法，就是使用一种特殊的硬件设备—-转换检测缓冲区(简称TLB，即快表)。TLB位于MMU中，包含少量的页表项，通过TBL可以直接将页面与页框相对应，而不需要查询页表。</p>
 <p>​                存在快表时的查询过程如流程图所示：</p>
-<p><img src="E:\blog\source\assert\存在TLB的访存.png"></p>
+<p><img src="/%E5%AD%98%E5%9C%A8TLB%E7%9A%84%E8%AE%BF%E5%AD%98.png"></p>
 <h4 id="3-3-2-多级页表和倒排表"><a href="#3-3-2-多级页表和倒排表" class="headerlink" title="3.3.2 多级页表和倒排表"></a>3.3.2 多级页表和倒排表</h4><p>​                针对页表过大的问题有许多解决方案，比较广泛使用的是多级页表和倒排表。</p>
 <p>​                多级页表的主要目标是避免全部页表都在内存之中，特别是一些不经常使用的页表项更不应该出现在内存里。为此多级页表将虚拟地址划分位多个部分，通常情况下是划分为二级或三级页表，即对于32位的虚拟地址，前10位是页表域1，之后10位是页表域2，最后12位是偏移量。多级页表的工作方式是这样的，MMU从虚拟地址中取出VA中域1的10位，作为首级页表的索引，从而从首级页表的页表项得到次级页表地址，根据次级页表地址与域2的10位从次级页表中得到实际的页框号，将页框号与偏移量结合，得到真实地址。采用多级页表能够有效的避免不常使用的页表项占据内存资源。</p>
 <p>​                另外一种解决页表过大的方式是倒排表。倒排表就是将物理内存中的每一个页框作为一个页表项，而不是根据页面作为一个页表项，这样子可以大大减少页表项的数量，不过缺点就是每次查找页表时都需要全表查找。</p>
@@ -373,6 +373,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2021/08/19/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E6%AD%BB%E9%94%81/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          操作系统中的死锁
+        
+      </div>
+    </a>
   
   
     <a href="/2021/08/17/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B9%8B%E8%BF%9B%E7%A8%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/" id="article-nav-older" class="article-nav-link-wrap">
@@ -518,11 +527,11 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color3">synchronized</a>
+                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color1">计算机网络</a>
+                <a href="javascript:void(0)" class="js-tag color3">synchronized</a>
               </li>
              
               <li class="article-tag-list-item">
