@@ -17,7 +17,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="e:/blog/source/assert/存在TLB的访存.png">
 <meta property="article:published_time" content="2021-08-18T13:56:30.000Z">
-<meta property="article:modified_time" content="2021-08-18T13:57:30.657Z">
+<meta property="article:modified_time" content="2021-08-19T07:14:46.669Z">
 <meta property="article:author" content="MoonLight">
 <meta property="article:tag" content="操作系统">
 <meta name="twitter:card" content="summary">
@@ -180,7 +180,7 @@
         <h1 id="操作系统存储管理"><a href="#操作系统存储管理" class="headerlink" title="操作系统存储管理"></a>操作系统存储管理</h1><p>​                内存作为计算机中CPU进行计算时直接访问的部分，在计算机里占有非常重要的地位。目前随着计算机的发展，内存的容量也得到极大的提升，但是现实的情况却是，程序运行时所需要的存储空间远远超过了内存的容量，并且内存与外村的速度，CPU与存储器件的速度差异过大。为了解决这个问题，人们提出了分层存储体系的概念。</p>
 <p>​                操作系统一个重要的任务就是管理分层存储，在操作系统中这部分称为存储管理器，存储管理器最重要的任务就是对内存进行管理，即记录哪些内存正在使用，哪些内存可以使用，如何为进程分配内存，如何在进程结束后释放内存。</p>
 <p>​                伴随着操作系统的存储管理器发展，提出了许多管理的解决方案，早期比较简单的有无存储抽象，即程序直接访问物理地址，到后来由于无存储抽象会导致诸多问题，从而发展出了有存储抽象，即程序访问虚拟地址进行访存的方式。</p>
-<!---more--->
+<span id="more"></span>
 
 <h2 id="1-无存储抽象"><a href="#1-无存储抽象" class="headerlink" title="1. 无存储抽象"></a>1. 无存储抽象</h2><p>​                无存储抽象的内存管理方式简单来说，就是每一个程序都可以直接访问物理内存地址。这种模型对于操作系统实现简单，但是会带来一些问题。</p>
 <p>​                首先最主要的问题就是访存冲突。因为同一时刻内存中只能装入一个程序，如果内存中同时装有多个程序，则不同的程序可能会出现访问同一物理地址的冲突。其次采用无存储抽象的方式来管理内存，基本上无法实现多进程，虽然可以按照多线程的方式使用内存，但是多线程毕竟与多进程存在本质上的差别。</p>
