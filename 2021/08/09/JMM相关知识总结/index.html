@@ -16,7 +16,7 @@
 <meta property="og:description" content="详细介绍了JMM的结构以及happens-before规则和重排序相关内容，分析了锁和volatile的内存语义">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-08-09T07:44:21.000Z">
-<meta property="article:modified_time" content="2021-08-09T07:45:08.783Z">
+<meta property="article:modified_time" content="2022-02-17T08:42:22.873Z">
 <meta property="article:author" content="MoonLight">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="JMM">
@@ -177,7 +177,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="JMM相关知识总结"><a href="#JMM相关知识总结" class="headerlink" title="JMM相关知识总结"></a>JMM相关知识总结</h1><p>​              并发模型的目的是为了解决线程间通信以及线程同步的问题。传统的并发模型分为两种，第一种是基于共享内存的并发模型，第二种是基于消息传递的并发模型。</p>
-<p>​              Java内存模型(JMM)就属于基于共享内存的并发模型。在JMM里，线程通过对共享内存的读写来完成通信，并且必须显示地指明何时在代码块或者方法体对共享内存进行读写，从而解决了线程同步的问题。</p>
+<p>​              Java内存模型(JMM)就属于基于共享内存的并发模型。在JMM里，线程通过对程序中共享内存的读写来完成通信，并且必须显示地指明何时在代码块或者方法体对共享内存进行读写，从而解决了线程同步的问题。</p>
 <p>​              JMM的根本作用就是通过主内存来解决线程间通信的可见性以及同步问题。</p>
 <p>​              下面深入剖析JMM的抽象结构，从而理解Java线程如何实现通信和同步。</p>
 <span id="more"></span>
@@ -228,7 +228,7 @@
 <p>​              从内存层面上讲，当写一个volatile变量时，JMM会把这个线程工作内存中的共享变量刷新到主内存。当读一个volatile变量时，JMM会把当前线程工作内存中共享变量的值设置为无效，重新从主内存中读取共享变量的值，这就是volatile的内存语义。</p>
 <p>​              volatile内存语义的底层实现原理是通过插入内存屏障。对于写volatile变量操作，JVM会在volatile写的前面插入SS屏障，后面插入SL屏障。在volatile写前插入SS屏障是为了确保对volatile变量写之前对普通变量的修改能立即可见，在volatile写后插入SL屏障是为了确保volatile变量的读不会被重排序到写之前，从而保证在volatile读时能获取到最新的值。</p>
 <p>​              而对于volatile读操作，JVM会在volatile读之后插入LL和LS屏障。</p>
-<h3 id="1-3-synchronized锁的内存语义"><a href="#1-3-synchronized锁的内存语义" class="headerlink" title="1.3 synchronized锁的内存语义"></a>1.3 synchronized锁的内存语义</h3><p>​              锁有同步和可见两种作用。锁的内存语义确保了在释放锁之前对临界区共享变量的更新对获取锁之后对共享变量的读取可见。</p>
+<h3 id="1-3-synchronized锁的内存语义"><a href="#1-3-synchronized锁的内存语义" class="headerlink" title="1.3 synchronized锁的内存语义"></a>1.3 synchronized锁的内存语义</h3><p>​              锁有<strong>同步和可见</strong>两种作用。锁的内存语义确保了在释放锁之前对临界区共享变量的更新对获取锁之后对共享变量的读取可见。</p>
 <p>​              锁的内存语义和volatile是一样的。当线程释放锁时，JMM会将该线程工作内存中共享变量的值刷新到主内存。当线程获取锁时，JMM会将该线程工作内存中共享变量置为无效，并从主内存中获取最新的值。</p>
 <h2 id="2-重排序"><a href="#2-重排序" class="headerlink" title="2. 重排序"></a>2. 重排序</h2><p>​              重排序是指为了提高执行程序的效率以及性能，在源码转换为指令序列的过程中对指令进行乱序。</p>
 <p>​              重排序分为两种：编译器级重排序，处理器级重排序。编译器重排序是指在不改变单线程语义的情况下，重新安排编译过程指令的顺序。处理器级重排序是指利用并行流水线技术对重叠多个指令的执行过程，或者使用内存读写缓冲区改变访问内存顺序。</p>
@@ -244,7 +244,7 @@
 <tbody><tr>
 <td>LoadLoad  Barriers</td>
 <td>L1;LLB;L2</td>
-<td>确保L1数据的读取先于L2及其之后所有后续读取的读取。</td>
+<td>确保L1数据的读取先于L2及其之后所有后续读取操作的读取。</td>
 </tr>
 <tr>
 <td>StoreStore Barriers</td>
@@ -262,7 +262,55 @@
 <td>确保S1存储到内存的数据可见先于L2及其后续所有读取指令的读取</td>
 </tr>
 </tbody></table>
+<h3 id="2-1-数据依赖性"><a href="#2-1-数据依赖性" class="headerlink" title="2.1 数据依赖性"></a>2.1 数据依赖性</h3><p>​              数据依赖性是指两个操作访问同一个变量，且其中一个操作是写操作，则这两个操作之间就存在数据依赖性。</p>
+<p>​              数据依赖性分为三种类型：</p>
+<table>
+<thead>
+<tr>
+<th>类型名称</th>
+<th>示例</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>写后读</td>
+<td>a = 1; b = a</td>
+<td>a先修改，b读取a，b与a存在写后读的数据依赖性</td>
+</tr>
+<tr>
+<td>写后写</td>
+<td>a = 1; a = 2</td>
+<td>a先后进行修改，则这两条修改语句存在写后写的数据依赖性</td>
+</tr>
+<tr>
+<td>读后写</td>
+<td>b = a; a = 1</td>
+<td>b读取a，a之后修改，b与a存在读后写的数据依赖性</td>
+</tr>
+</tbody></table>
+<p>​              现代处理器以及编译器针对存在数据依赖性的语句不会进行重排序，因为这会破坏程序的单线程语义。</p>
+<h2 id="3-以单例模式探讨JMM"><a href="#3-以单例模式探讨JMM" class="headerlink" title="3. 以单例模式探讨JMM"></a>3. 以单例模式探讨JMM</h2><p>​              单例模式能确保一个类只有一个实例，并且需要类的构造器必须是私有的，外部想要访问这个实例只能通过特定的静态方法获取。而为了减少初始化类和创建实例的开销，往往会使用一些延迟初始化的方法，在需要使用单例对象时才进行实例化。常见的延迟化单例模式实现代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Instance instance;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Instance <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(instance == <span class="keyword">null</span>)     <span class="comment">//线程A</span></span><br><span class="line">            instance = <span class="keyword">new</span> Instance();  <span class="comment">//线程B</span></span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<p>​              但是该单例模式的代码时线程不安全的。当线程A读取到instance为null时突然发生上下文切换，线程B进入执行创建单例对象的语句，这样当线程A重新执行时，会创建一个新的单例对象，从而破坏了实例对象唯一的性质。</p>
+<h3 id="3-1-使用锁来确保延迟初始化的线程安全"><a href="#3-1-使用锁来确保延迟初始化的线程安全" class="headerlink" title="3.1 使用锁来确保延迟初始化的线程安全"></a>3.1 使用锁来确保延迟初始化的线程安全</h3><p>​              一种比较简单的方式是采用锁，使得创建和获取实例对象是线程安全的。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Instance instance;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">static</span> Instance <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(instance == <span class="keyword">null</span>)     <span class="comment">//线程A</span></span><br><span class="line">            instance = <span class="keyword">new</span> Instance();  <span class="comment">//线程B</span></span><br><span class="line">		<span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​              从JMM的角度理解为什么加锁可以确保多线程能正确获取到单例对象的状态。由于锁的内存语义是释放锁之前对共享变量的写happens-before获取锁对共享变量的读，故线程A在释放锁之前，instance对象已经创建并刷新到主内存中，当线程B获取锁时，就能从主内存里读取到已经被创建的instance对象。</p>
+<p>​              加锁确实可以保证线程安全，但同时也带来了使用锁的性能开销。对此，有人提出了双重检查锁定的方式尝试确保线程安全的同时，减少性能开销。</p>
+<h3 id="3-2-使用双重检查锁定-DCL-的方式"><a href="#3-2-使用双重检查锁定-DCL-的方式" class="headerlink" title="3.2 使用双重检查锁定(DCL)的方式"></a>3.2 使用双重检查锁定(DCL)的方式</h3><p>​              双重检查锁定是为了减少synchronized的性能开销，代码实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Instance instance;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Instance <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(instance == <span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span>(Singleton.class)&#123;</span><br><span class="line">                <span class="keyword">if</span>(instance == <span class="keyword">null</span>)</span><br><span class="line">                    instance = <span class="keyword">new</span> Instance();  <span class="comment">//问题出在这里</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​              这样当线程检查到instance不为null，就不用执行之后的加锁和初始化操作，因此可以大幅降低synchronized的性能开销。</p>
+<p>​              但是DCL模式存在严重的错误！</p>
+<p>​              instance = new Instance()这条语句在汇编指令层面分为三个操作：</p>
+<figure class="highlight mips"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">memory = allocate() //<span class="number">1</span>.分配对象的内存空间</span><br><span class="line">ctorInstance(memory) //<span class="number">2</span>.初始化对象</span><br><span class="line"><span class="keyword">instance </span>= memory //<span class="number">3</span>.设置<span class="keyword">instance指向刚分配的内存地址</span></span><br></pre></td></tr></table></figure>
+
+<p>​              代码2和3由于不存在数据依赖性，故处理器可能会对2和3指令进行重排序，这样在多线程的情况下，线程A执行实例化的时，先执行3，将instance指向刚分配的内存地址，但是此时对象还没有完成初始化，当线程B访问时，instance != null，线程B就会访问到一个不存在的对象，从而导致严重的错误！。</p>
+<h3 id="3-3-基于volatile改进的DCL模式"><a href="#3-3-基于volatile改进的DCL模式" class="headerlink" title="3.3 基于volatile改进的DCL模式"></a>3.3 基于volatile改进的DCL模式</h3><p>​              DCL模式出现问题的根源在于指令重排序，导致程序的语义出错。而如果使用volatile修饰单例对象，则可以避免重排序，从而保证DCL模式的安全。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Singleton</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">volatile</span> <span class="keyword">static</span> Instance instance;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="title">Singleton</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Instance <span class="title">getInstance</span><span class="params">()</span></span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(instance == <span class="keyword">null</span>)&#123;</span><br><span class="line">            <span class="keyword">synchronized</span>(Singleton.class)&#123;</span><br><span class="line">                <span class="keyword">if</span>(instance == <span class="keyword">null</span>)</span><br><span class="line">                    instance = <span class="keyword">new</span> Instance();  <span class="comment">//现在问题解决了</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> instance;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-4-最佳实现：基于枚举实现延迟初始化单例模式"><a href="#3-4-最佳实现：基于枚举实现延迟初始化单例模式" class="headerlink" title="3.4 最佳实现：基于枚举实现延迟初始化单例模式"></a>3.4 最佳实现：基于枚举实现延迟初始化单例模式</h3>
       
 
       
@@ -435,7 +483,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2021 MoonLight
+    		&copy; 2022 MoonLight
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -522,11 +570,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">JMM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">JUC</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">JMM</a>
+                <a href="javascript:void(0)" class="js-tag color3">Mybatis</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -539,6 +591,22 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">synchronized</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">服务降级</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">服务熔断</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">图论</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">微服务</a>
               </li>
              
               <li class="article-tag-list-item">

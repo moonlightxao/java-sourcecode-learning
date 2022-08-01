@@ -8,12 +8,12 @@
   <link rel="dns-prefetch" href="http://example.com">
   <title>MoonLight的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京理工大学18级软件工程，喜欢Java后端技术">
+  <meta name="description" content="南京理工大学18级软件工程本科，华为软件开发工程师">
 <meta property="og:type" content="website">
 <meta property="og:title" content="MoonLight的博客">
 <meta property="og:url" content="http://example.com/index.html">
 <meta property="og:site_name" content="MoonLight的博客">
-<meta property="og:description" content="南京理工大学18级软件工程，喜欢Java后端技术">
+<meta property="og:description" content="南京理工大学18级软件工程本科，华为软件开发工程师">
 <meta property="og:locale" content="en_US">
 <meta property="article:author" content="MoonLight">
 <meta name="twitter:card" content="summary">
@@ -153,6 +153,363 @@
           </div>
           <div id="js-content" class="content-ll">
             
+  
+    <article id="post-微服务学习笔记：服务降级和服务熔断" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%9A%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7%E5%92%8C%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD/">服务降级和服务熔断</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%9A%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7%E5%92%8C%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD/" class="archive-article-date">
+  	<time datetime="2022-08-01T07:42:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="微服务学习笔记：服务降级和服务熔断"><a href="#微服务学习笔记：服务降级和服务熔断" class="headerlink" title="微服务学习笔记：服务降级和服务熔断"></a>微服务学习笔记：服务降级和服务熔断</h1><h2 id="1-什么是服务降级和服务熔断"><a href="#1-什么是服务降级和服务熔断" class="headerlink" title="1. 什么是服务降级和服务熔断"></a>1. 什么是服务降级和服务熔断</h2><p>​         要理解服务降级和服务熔断，得先从服务雪崩说起。</p>
+<p>​         基于分布式的微服务架构系统将单个应用程序开发为一组小的服务单元，每个小服务单元根据业务构建，并且之间存在依赖关系。服务单元按序依次调用其他服务单元，构成调用链。但是如果调用链中下游的服务单元响应时间过长，或者出现宕机的情况，则可能导致上游的服务单元资源被耗尽，从而导致调用链出现崩溃。<strong>这种调用链出现级联崩溃的现象称为服务雪崩</strong>。</p>
+<p>​         而为了避免分布式系统出现服务雪崩，就要在服务单元出现问题时采取一定的措施。较为常用的方法有服务降级和服务熔断。</p>
+        
+          <a class="article-more-a" href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%9A%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7%E5%92%8C%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">服务降级</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">服务熔断</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/微服务//" class="article-tag-list-link color4">微服务</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0%EF%BC%9A%E6%9C%8D%E5%8A%A1%E9%99%8D%E7%BA%A7%E5%92%8C%E6%9C%8D%E5%8A%A1%E7%86%94%E6%96%AD/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-图论之拓扑排序和并查集" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/01/%E5%9B%BE%E8%AE%BA%E4%B9%8B%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E5%92%8C%E5%B9%B6%E6%9F%A5%E9%9B%86/">图论：拓扑排序与并查集</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/01/%E5%9B%BE%E8%AE%BA%E4%B9%8B%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E5%92%8C%E5%B9%B6%E6%9F%A5%E9%9B%86/" class="archive-article-date">
+  	<time datetime="2022-08-01T07:38:15.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="图论：拓扑排序和并查集"><a href="#图论：拓扑排序和并查集" class="headerlink" title="图论：拓扑排序和并查集"></a>图论：拓扑排序和并查集</h1><h2 id="1-拓扑排序"><a href="#1-拓扑排序" class="headerlink" title="1. 拓扑排序"></a>1. 拓扑排序</h2><p>​          在总结拓扑排序之前，先总结几个概念。AOV网是指用顶点表示活动，边表示优先关系的有向图。若&lt;v,w&gt;是图中的有向边，则称v是w的直接前驱。若存在一条v到w的路径，则称v是w的前驱。AOV网中不允许回路，因为一旦存在回路，则说明有活动以自己为先决条件。</p>
+<p>​          拓扑有序序列是指把AOV网中各个结点，按照优先关系排列成一个线性序列的过程。如果v是w的前驱，则v出现在拓扑有序序列的位置一定比w靠前。否则v和w出现在拓扑有序序列的位置顺序任意。</p>
+<p>​          拓扑排序是指把AOV网中的顶点构造拓扑有序序列的过程。</p>
+        
+          <a class="article-more-a" href="/2022/08/01/%E5%9B%BE%E8%AE%BA%E4%B9%8B%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E5%92%8C%E5%B9%B6%E6%9F%A5%E9%9B%86/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">图论</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/算法//" class="article-tag-list-link color3">算法</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/01/%E5%9B%BE%E8%AE%BA%E4%B9%8B%E6%8B%93%E6%89%91%E6%8E%92%E5%BA%8F%E5%92%8C%E5%B9%B6%E6%9F%A5%E9%9B%86/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-微服务架构理论基础" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/">微服务架构理论知识学习</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/" class="archive-article-date">
+  	<time datetime="2022-08-01T07:35:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="微服务架构理论知识学习"><a href="#微服务架构理论知识学习" class="headerlink" title="微服务架构理论知识学习"></a>微服务架构理论知识学习</h1><h2 id="1-什么是微服务"><a href="#1-什么是微服务" class="headerlink" title="1. 什么是微服务"></a>1. 什么是微服务</h2><p>​           微服务架构是一种将单个应用程序开发为一组小服务的方法，每个小服务都运行在自己的进程中。小服务之间通过轻量级机制进行通信。这些小服务的划分和构建的依据是业务的范围，并且可以通过全自动机制对这些服务进行独立部署。这些小服务可以使用不同的编程语言编写，并可以使用不同的数据存储技术。</p>
+        
+          <a class="article-more-a" href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">微服务</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/微服务//" class="article-tag-list-link color4">微服务</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/01/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-Mybatis-Plus分页查询使用以及源码分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/08/01/Mybatis-Plus%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">Mybatis-Plus分页查询使用以及源码分析</a>
+    </h1>
+  
+
+        
+        <a href="/2022/08/01/Mybatis-Plus%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="archive-article-date">
+  	<time datetime="2022-08-01T07:24:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-08-01</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Mybatis-Plus分页查询使用以及源码分析"><a href="#Mybatis-Plus分页查询使用以及源码分析" class="headerlink" title="Mybatis-Plus分页查询使用以及源码分析"></a>Mybatis-Plus分页查询使用以及源码分析</h1><h2 id="1-如何使用Mybatis-Plus进行分页查询"><a href="#1-如何使用Mybatis-Plus进行分页查询" class="headerlink" title="1. 如何使用Mybatis-Plus进行分页查询"></a>1. 如何使用Mybatis-Plus进行分页查询</h2><p>​        在数据量过大，页面无法一次性展示时，使用分页查询能提高查询的效率，并且使得展示页面更简洁。     </p>
+<p>​        Mybatis-Plus提供了十分便捷的分页查询方式。简单来说就是编写配置类，然后使用提供当前页面和每页数量等参数给其提供的接口即可。下面用一个实例程序展示如何使用Mybatis-Plus进行分页查询。</p>
+        
+          <a class="article-more-a" href="/2022/08/01/Mybatis-Plus%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/#more">more >></a>
+        
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Mybatis</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/Mybatis-Plus//" class="article-tag-list-link color3">Mybatis-Plus</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/08/01/Mybatis-Plus%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2%E4%BD%BF%E7%94%A8%E4%BB%A5%E5%8F%8A%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
   
     <article id="post-操作系统中的死锁" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
@@ -640,7 +997,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="JMM相关知识总结"><a href="#JMM相关知识总结" class="headerlink" title="JMM相关知识总结"></a>JMM相关知识总结</h1><p>​              并发模型的目的是为了解决线程间通信以及线程同步的问题。传统的并发模型分为两种，第一种是基于共享内存的并发模型，第二种是基于消息传递的并发模型。</p>
-<p>​              Java内存模型(JMM)就属于基于共享内存的并发模型。在JMM里，线程通过对共享内存的读写来完成通信，并且必须显示地指明何时在代码块或者方法体对共享内存进行读写，从而解决了线程同步的问题。</p>
+<p>​              Java内存模型(JMM)就属于基于共享内存的并发模型。在JMM里，线程通过对程序中共享内存的读写来完成通信，并且必须显示地指明何时在代码块或者方法体对共享内存进行读写，从而解决了线程同步的问题。</p>
 <p>​              JMM的根本作用就是通过主内存来解决线程间通信的可见性以及同步问题。</p>
 <p>​              下面深入剖析JMM的抽象结构，从而理解Java线程如何实现通信和同步。</p>
         
@@ -713,284 +1070,10 @@
 
 
   
-    <article id="post-ReentrantLock总结以及原理分析" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">ReentrantLock总结以及原理分析</a>
-    </h1>
-  
-
-        
-        <a href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:22:21.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="ReentrantLock总结以及原理分析"><a href="#ReentrantLock总结以及原理分析" class="headerlink" title="ReentrantLock总结以及原理分析"></a>ReentrantLock总结以及原理分析</h1><p>​                  ReentrantLock是一种支持可重入，公平与非公平，中断敏感，超时获取的锁。ReentrantLock与synchronized类似，都支持锁重入，但是synchronized是隐式重入，ReentrantLock调用lock方法可以显式重入，更加灵活。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">ReentrantLock</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/ReentrantLock%E6%80%BB%E7%BB%93%E4%BB%A5%E5%8F%8A%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Java多线程基础" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">Java多线程基础</a>
-    </h1>
-  
-
-        
-        <a href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Java多线程基础"><a href="#Java多线程基础" class="headerlink" title="Java多线程基础"></a>Java多线程基础</h1><p>​                 现代程序大多数都是多线程程序，因为目前CPU处理器普遍是多核心的，将程序划分为多线程执行能够充分利用CPU的多个核心，从而提高程序运行的效率。Java作为生命力强悍的语言，其对多线程的支持也是非常优秀的。下面简单总结Java中线程的相关基础知识。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/Java%E5%A4%9A%E7%BA%BF%E7%A8%8B%E5%9F%BA%E7%A1%80/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-JUC中锁与AQS相关知识总结" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">JUC中锁与AQS相关知识总结</a>
-    </h1>
-  
-
-        
-        <a href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/" class="archive-article-date">
-  	<time datetime="2021-08-07T12:15:30.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-08-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="JUC中锁与AQS相关知识总结"><a href="#JUC中锁与AQS相关知识总结" class="headerlink" title="JUC中锁与AQS相关知识总结"></a>JUC中锁与AQS相关知识总结</h1><h2 id="1-Lock接口"><a href="#1-Lock接口" class="headerlink" title="1. Lock接口"></a>1. Lock接口</h2><p>​              在Java5之前，要想使用锁来保护共享资源大多数情况是使用synchronized关键字。在Java5之后，并发包里增加了Lock接口及其实现类来提供锁的功能。</p>
-<p>​              Lock接口与synchronized有许多区别。synchronized修饰在方法体或者代码块上可以隐式地获取和释放锁，并且锁地获取和释放操作被固化。但是Lock接口可以显示地获取和释放锁，提高了锁的可操作性。并且Lock接口支持可中断锁以及超时锁等synchronized没有的特性。</p>
-        
-          <a class="article-more-a" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/#more">more >></a>
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Java</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">JUC</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/Java//" class="article-tag-list-link color5">Java</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/08/07/JUC%E4%B8%AD%E9%94%81%E4%B8%8EAQS%E7%9B%B8%E5%85%B3%E7%9F%A5%E8%AF%86%E6%80%BB%E7%BB%93/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+    </nav>
   
 
 
@@ -1001,7 +1084,7 @@
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2021 MoonLight
+    		&copy; 2022 MoonLight
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
@@ -1088,11 +1171,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               </li>
              
               <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">JMM</a>
+              </li>
+             
+              <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">JUC</a>
               </li>
              
               <li class="article-tag-list-item">
-                <a href="javascript:void(0)" class="js-tag color4">JMM</a>
+                <a href="javascript:void(0)" class="js-tag color3">Mybatis</a>
               </li>
              
               <li class="article-tag-list-item">
@@ -1105,6 +1192,22 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">synchronized</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">服务降级</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">服务熔断</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">图论</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">微服务</a>
               </li>
              
               <li class="article-tag-list-item">
